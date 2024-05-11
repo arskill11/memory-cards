@@ -4,6 +4,7 @@ import Cards from './components/Cards';
 import { useState } from 'react';
 import LoseWindow from './components/LoseWindow';
 import './App.css';
+import WinWindow from './components/WinWindow';
 
 function App() {
   const [guessedCount, setGuessedCount] = useState<number>(0);
@@ -23,6 +24,12 @@ function App() {
           setChosenPokemons={setChosenPokemons}
           setIsLost={setIsLost}
           count={guessedCount}
+        />
+      ) : guessedCount === 20 ? (
+        <WinWindow
+          setCount={setGuessedCount}
+          setChosenPokemons={setChosenPokemons}
+          setIsLost={setIsLost}
         />
       ) : (
         <>

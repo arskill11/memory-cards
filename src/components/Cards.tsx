@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
+import shuffleArray from '../utils';
+import Pokemon from '../types';
 import Card from './Card';
-
-interface Pokemon {
-  name: string;
-  url: string;
-  isFlipped: boolean;
-}
 
 interface Props {
   count: number;
@@ -15,6 +11,8 @@ interface Props {
   setChosenPokemons: React.Dispatch<React.SetStateAction<string[]>>;
   setIsLost: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+const MAX_POKEMON_COUNT = 20;
 
 const Cards: React.FC<Props> = ({
   count,
@@ -30,7 +28,10 @@ const Cards: React.FC<Props> = ({
       try {
         const response = await fetch('https://pokeapi.co/api/v2/pokemon/');
         const data = await response.json();
-        const shuffledPokemons = shuffleArray(data.results).slice(0, 20);
+        const shuffledPokemons = shuffleArray(data.results).slice(
+          0,
+          MAX_POKEMON_COUNT,
+        );
 
         const pokemonUrlsPromises = shuffledPokemons.map(async (pokemon) => {
           const urlResponse = await fetch(pokemon.url);
@@ -39,6 +40,7 @@ const Cards: React.FC<Props> = ({
             name: pokemon.name,
             url: urlData.sprites.front_default,
             isFlipped: false,
+            isDisabled: false,
           };
         });
 
@@ -53,10 +55,15 @@ const Cards: React.FC<Props> = ({
   }, []);
 
   const handleCardFlip = () => {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card) => {
+      card.removeEventListener('click', handleCardFlip);
+    });
     setPokemons((prevPokemons) =>
       prevPokemons.map((pokemon) => ({
         ...pokemon,
         isFlipped: true,
+        isDisabled: true,
       })),
     );
 
@@ -66,30 +73,19 @@ const Cards: React.FC<Props> = ({
         return shuffledPokemons.map((pokemon) => ({
           ...pokemon,
           isFlipped: false,
+          isDisabled: false,
         }));
       });
     }, 1000);
   };
 
-  function shuffleArray(array: Pokemon[]) {
-    const shuffledArray = [...array];
-    for (let i = shuffledArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledArray[i], shuffledArray[j]] = [
-        shuffledArray[j],
-        shuffledArray[i],
-      ];
-    }
-    return shuffledArray;
-  }
-
   return (
     <div className="cards">
-      {pokemons.map((poke) => (
+      {pokemons.map((pokemon) => (
         <Card
-          pokemon={poke}
-          key={poke.name}
-          setFlipped={handleCardFlip}
+          pokemon={pokemon}
+          key={pokemon.name}
+          setIsFlipped={handleCardFlip}
           chosenPokemons={chosenPokemons}
           setChosenPokemons={setChosenPokemons}
           count={count}

@@ -1,23 +1,18 @@
 import './styles.css';
-
-interface Pokemon {
-  name: string;
-  url: string;
-  isFlipped: boolean;
-}
+import Pokemon from '../types';
 
 interface Props {
   pokemon: Pokemon;
   chosenPokemons: string[];
   count: number;
-  setFlipped: () => void;
+  setIsFlipped: () => void;
   setChosenPokemons: React.Dispatch<React.SetStateAction<string[]>>;
   setCount: React.Dispatch<React.SetStateAction<number>>;
   setIsLost: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Card: React.FC<Props> = ({
-  setFlipped,
+  setIsFlipped,
   pokemon,
   chosenPokemons,
   setChosenPokemons,
@@ -25,30 +20,32 @@ const Card: React.FC<Props> = ({
   setCount,
   setIsLost,
 }) => {
-  let ik = false;
-  function handleClick(e: React.MouseEvent<HTMLDivElement>) {
+  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
-    const divElement = e.currentTarget;
-    const id = divElement.getAttribute('id');
-    chosenPokemons.map((poke) => {
-      if (id && poke === id) {
+    let pokemonRepetition = false;
+    const btnElement = e.currentTarget;
+    const id = btnElement.getAttribute('id');
+    console.log(id);
+    chosenPokemons.map((pokemon) => {
+      if (id && pokemon === id) {
         setIsLost(true);
-        ik = true;
+        pokemonRepetition = true;
       }
     });
 
-    if (!ik && id) {
+    if (!pokemonRepetition && id) {
       setChosenPokemons([...chosenPokemons, id]);
       setCount(count + 1);
-      setFlipped();
+      setIsFlipped();
     }
   }
 
   return (
-    <div
+    <button
       className={`card ${pokemon.isFlipped ? 'flipped' : ''}`}
       onClick={handleClick}
       id={pokemon.name}
+      disabled={pokemon.isDisabled}
     >
       <img
         src={pokemon.url}
@@ -57,7 +54,7 @@ const Card: React.FC<Props> = ({
         onClick={(e) => e.preventDefault()}
       />
       <h4 className="card--pokeName">{pokemon.name}</h4>
-    </div>
+    </button>
   );
 };
 
